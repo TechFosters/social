@@ -1,0 +1,20 @@
+{
+  "name": "social",
+  "version": "1.0.0",
+  "description": "backend for social app",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js"
+  },
+  "keywords": [
+    "node",
+    "backend"
+  ],
+  "author": "Akshit Mudgal",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
