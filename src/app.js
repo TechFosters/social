@@ -2,20 +2,35 @@ import express from 'express'
 
 const app = express();
 
-//request handler: it handles all the request starting with / ex: /hello, /xyz
+//order of the route matters
+// app.use("/user",(req,res)=>{
+//     res.send({
+//         success: true,
+//         message: "this is app.use()"
+//     })
+// })
 
-app.use("/",(req, res)=>{
-    res.send("this is the dashboard")
+//GET REQUEST
+app.get("/user", (req, res)=>{
+    res.send({
+        sucess: true,
+        message: "this is a GET request"
+    })
 })
-//request handler via route : it handles att the request starting witj /hello ex /hello/v1
-app.use("/hello", (req,res)=>{
-    res.send("Hello, Helloo, Helllooo")
+//POST REQUEST
+app.post("/user",(req, res)=>{
+   res.send({
+    sucess: true,
+    message: "this is a POST request"
+   })
 })
-
-app.use("/test", (req,res)=>{
-    res.send("test, test, test")
+//DELETE REQUEST
+app.delete("/user",(req, res)=>{
+    res.send({
+        success: true,
+        message: "this is a DELETE request"
+    })
 })
-
 
 //creating the server
 app.listen(3000, ()=>{
