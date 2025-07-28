@@ -86,11 +86,12 @@ app.delete('/user', async(req,res)=>{
 
 //patch user
 
-app.patch('/user', async(req,res)=>{
-    const userId = req.body.userId
+app.patch('/user/:id', async(req,res)=>{
+    console.log("This is req.params", req.params)
+    const userId = req.params?.id
     const data = req.body
     try{
-        const allowedUpdates = ['userId', 'photoURL','age','gender','password', 'about']
+        const allowedUpdates = ['photoURL','age','gender','password', 'about']
         const isUpdateAllowed = Object.keys(data).every((k)=>allowedUpdates.includes(k))
         if(!isUpdateAllowed){
             throw new Error("this field can't be updated")
