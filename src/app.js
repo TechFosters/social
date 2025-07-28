@@ -86,26 +86,43 @@ app.delete('/user', async(req,res)=>{
 
 //patch user
 
-// app.patch('/user', async(req,res)=>{
-//     const userId = req.body.userId
-//     try{
-//     const updatedUser= await User.findByIdAndUpdate({_id: userId},{firstName: 'KashiNath', lastName: 'Ghatak'},{returnDocument:"before"})
-//     console.log(updatedUser)
-//     res.send("user updated successfully")
-//     }catch(err){
-//         res.status(404).send("Something went wrong while updation"+err.message)
-//     }
-
-// })
-
 app.patch('/user', async(req,res)=>{
-    const email = req.body.emailId
+    const userId = req.body.userId
     const data = req.body
     try{
-        const user = await User.findOneAndUpdate({emailId: email}, data)
-        console.log(user)
-        res.status(201).send('User updated sucessfully')
+        const allowedUpdates = ['userId', 'photoURL','age','gender','password', 'about']
+        const isUpdateAllowed = Object.keys(data).every((k)=>allowedUpdates.includes(k))
+        if(!isUpdateAllowed){
+            throw new Error("this field can't be updated")
+        }
+    const updatedUser= await User.findByIdAndUpdate({_id: userId}, data ,{returnDocument:"before"})
+    console.log(updatedUser)
+    res.send("user updated successfully")
     }catch(err){
-        res.status(400).send('No user found with the above id'+err.message)
+        res.status(404).send("Something went wrong while updation"+ err.message)
     }
+
 })
+
+// app.patch('/user', async(req,res)=>{
+//     const email = req.body.emailId
+//     const data = req.body
+
+   
+//     try{
+//          //API LEVEL VALIDATION
+
+//     // const allowedUpdates = ['photoURL', 'about', 'password', 'age', 'gender']
+
+//     // const isUpdateAllowed = Object.keys(data).every((k)=>allowedUpdates.includes(k))
+
+//     // if(!isUpdateAllowed){
+//     //   throw new Error("This field can't be updated")
+//     // }
+//         const user = await User.findOneAndUpdate({emailId: email}, data)
+//         console.log(user)
+//         res.status(201).send('User updated sucessfully')
+//     }catch(err){
+//         res.status(400).send('No user found with the above id'+err.message)
+//     }
+// })
