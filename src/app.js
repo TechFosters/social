@@ -68,7 +68,7 @@ app.post('/signup', async (req,res)=>{
     await user.save()
     res.status(201).send("user added successfully")
     }catch(err){
-        res.status(400).send("error while adding user to DB: ", err.message)
+        res.status(400).send("error while adding user to DB: "+ err.message)
     }
 })
 
@@ -100,9 +100,9 @@ app.delete('/user', async(req,res)=>{
 
 app.patch('/user', async(req,res)=>{
     const email = req.body.emailId
-
+    const data = req.body
     try{
-        const user = await User.findOneAndUpdate({emailId: email}, {firstName: 'Vijay', lastName: 'Kumar'})
+        const user = await User.findOneAndUpdate({emailId: email}, data)
         console.log(user)
         res.status(201).send('User updated sucessfully')
     }catch(err){
