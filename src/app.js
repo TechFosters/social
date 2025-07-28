@@ -86,14 +86,26 @@ app.delete('/user', async(req,res)=>{
 
 //patch user
 
-app.patch('/user', async(req,res)=>{
-    const userId = req.body.userId
-    try{
-    const updatedUser= await User.findByIdAndUpdate({_id: userId},{firstName: 'KashiNath', lastName: 'Ghatak'},{returnDocument:"before"})
-    console.log(updatedUser)
-    res.send("user updated successfully")
-    }catch(err){
-        res.status(404).send("Something went wrong while updation"+err.message)
-    }
+// app.patch('/user', async(req,res)=>{
+//     const userId = req.body.userId
+//     try{
+//     const updatedUser= await User.findByIdAndUpdate({_id: userId},{firstName: 'KashiNath', lastName: 'Ghatak'},{returnDocument:"before"})
+//     console.log(updatedUser)
+//     res.send("user updated successfully")
+//     }catch(err){
+//         res.status(404).send("Something went wrong while updation"+err.message)
+//     }
 
+// })
+
+app.patch('/user', async(req,res)=>{
+    const email = req.body.emailId
+
+    try{
+        const user = await User.findOneAndUpdate({emailId: email}, {firstName: 'Vijay', lastName: 'Kumar'})
+        console.log(user)
+        res.status(201).send('User updated sucessfully')
+    }catch(err){
+        res.status(400).send('No user found with the above id'+err.message)
+    }
 })
