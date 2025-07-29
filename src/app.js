@@ -85,6 +85,26 @@ app.post('/signup', async (req,res)=>{
     }
 })
 
+app.get('/login', async(req,res)=>{
+    const {password, email} = req.body
+    try{
+
+        const user = await User.findOne({emailId: email})
+        if(!user){
+            throw new Error("User not found")
+        }
+
+        const isPasswordValid = bcrypt.compare(password, user.password)
+        if(isPasswordValid){
+            res.send("Logged In Successfully")
+        }else{
+            res.send("Invalid Credentials")
+        }
+    }catch(err){
+        res.send("Error: " + err.message)
+    }
+})
+
 //delete user
 
 app.delete('/user', async(req,res)=>{
