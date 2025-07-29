@@ -2,7 +2,7 @@ import express from 'express'
 import { createDbConnection } from './config/database.js';
 import { User } from './models/user.js';
 import { validateSignUpData } from './utils/validation.js';
-
+import bcrypt from 'bcrypt'
 const app = express();
 
 createDbConnection().then(()=>{
@@ -64,9 +64,20 @@ app.post('/signup', async (req,res)=>{
    console.log("This is req.body: ", req.body)
     //
     const user = new User(req.body)
-
+    const {password, firstName, lastName, emailId,age,gender} = req.body
     try{
     validateSignUpData(req)
+    //hashing password
+    const hashedPassword = await bcrypt.hash(password,10)
+    console.log(hashedPassword)
+    const user = new User({
+        firstName,
+        lastName,
+        emailId,
+        password: hashedPassword,
+        age,
+        gender
+    })
     await user.save()
     res.status(201).send("user added successfully")
     }catch(err){
