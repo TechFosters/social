@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-
+import validator from "validator";
 const userSchema = new mongoose.Schema({
     firstName: {
         type: String,
@@ -32,13 +32,24 @@ const userSchema = new mongoose.Schema({
         required: true,
         lowercase: true,
         trim: true,
-        unique: true
+        unique: true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Invalid email address: " + value  )
+            }
+        }
     },
 
     password: {
         type: String,
-        minLength: 6,
+        //minLength: 6,
         maxLength: 20,
+        validate(value){
+            if(!validator.isStrongPassword(value)){
+                throw new Error("Password must have at at least 8 characters that include at least 1 lowercase character, 1 uppercase character, 1 number, and 1 special character")
+            }
+        }
+
 
     },
 

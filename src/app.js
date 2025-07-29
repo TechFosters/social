@@ -1,6 +1,7 @@
 import express from 'express'
 import { createDbConnection } from './config/database.js';
 import { User } from './models/user.js';
+import { validateSignUpData } from './utils/validation.js';
 
 const app = express();
 
@@ -61,10 +62,11 @@ app.get('/feed', async(req,res)=>{
 })
 app.post('/signup', async (req,res)=>{
    console.log("This is req.body: ", req.body)
-
+    //
     const user = new User(req.body)
 
     try{
+    validateSignUpData(req)
     await user.save()
     res.status(201).send("user added successfully")
     }catch(err){
