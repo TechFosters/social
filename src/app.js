@@ -4,15 +4,16 @@ import { User } from './models/user.js';
 import { validateSignUpData } from './utils/validation.js';
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser';
+import jwt from 'jsonwebtoken'
 const app = express();
 
-createDbConnection().then(()=>{
+createDbConnection().then(() => {
 
     console.log("DB connection successful")
-    app.listen(3000,()=>{
+    app.listen(3000, () => {
         console.log("server is up and running")
-    })  
-}).catch((err)=>{
+    })
+}).catch((err) => {
     console.log("error connection db", err)
 })
 
@@ -20,127 +21,129 @@ app.use(express.json())
 app.use(cookieParser())
 //get users by email
 
-app.get('/user', async (req,res)=>{
+app.get('/user', async (req, res) => {
     //pick the email from request
     const email = req.body.emailId
 
-    try{
-        const user = await User.findOne({emailId: email})
-        if(!user){
+    try {
+        const user = await User.findOne({ emailId: email })
+        if (!user) {
             res.send('user not found')
-        }else{
+        } else {
             res.send(user)
         }
-    }catch(err){
+    } catch (err) {
         res.status(404).send('something went wrong')
     }
 
-//     try{
-//     const users = await User.find({emailId: email})
-//     console.log(users)
+    //     try{
+    //     const users = await User.find({emailId: email})
+    //     console.log(users)
 
-//     if(users.length===0){
-//         res.status(404).send("No user found with this email")
-//     }else{
-//         res.status(201).send(users)
-//     }
-// }catch(err){
-//     res.send("User not found")
-// }
+    //     if(users.length===0){
+    //         res.status(404).send("No user found with this email")
+    //     }else{
+    //         res.status(201).send(users)
+    //     }
+    // }catch(err){
+    //     res.send("User not found")
+    // }
 })
 
-app.get('/feed', async(req,res)=>{
-    try{
+app.get('/feed', async (req, res) => {
+    try {
         const users = await User.find({})
-        if(users.length > 0){
+        if (users.length > 0) {
             res.status(201).send(users)
-        }else{
+        } else {
             res.status(404).send("Nothing to show here")
         }
 
-    }catch(err){
+    } catch (err) {
         res.send("Error fetching the feed")
     }
 })
-app.post('/signup', async (req,res)=>{
-   console.log("This is req.body: ", req.body)
+app.post('/signup', async (req, res) => {
+    console.log("This is req.body: ", req.body)
     //
     const user = new User(req.body)
-    const {password, firstName, lastName, emailId,age,gender} = req.body
-    try{
-    validateSignUpData(req)
-    //hashing password
-    const hashedPassword = await bcrypt.hash(password,10)
-    console.log(hashedPassword)
-    const user = new User({
-        firstName,
-        lastName,
-        emailId,
-        password: hashedPassword,
-        age,
-        gender
-    })
-    await user.save()
-    res.status(201).send("user added successfully")
-    }catch(err){
-        res.status(400).send("error while adding user to DB: "+ err.message)
+    const { password, firstName, lastName, emailId, age, gender } = req.body
+    try {
+        validateSignUpData(req)
+        //hashing password
+        const hashedPassword = await bcrypt.hash(password, 10)
+        console.log(hashedPassword)
+        const user = new User({
+            firstName,
+            lastName,
+            emailId,
+            password: hashedPassword,
+            age,
+            gender
+        })
+        await user.save()
+        res.status(201).send("user added successfully")
+    } catch (err) {
+        res.status(400).send("error while adding user to DB: " + err.message)
     }
 })
 
-app.get('/login', async(req,res)=>{
-    const {password, email} = req.body
-    try{
+app.get('/login', async (req, res) => {
+    const { password, email } = req.body
+    try {
 
-        const user = await User.findOne({emailId: email})
-        if(!user){
+        const user = await User.findOne({ emailId: email })
+        if (!user) {
             throw new Error("User not found")
         }
 
         const isPasswordValid = bcrypt.compare(password, user.password)
-        if(isPasswordValid){
+        if (isPasswordValid) {
 
             //create a jwt
-            res.cookie('token', 'sdscdcdbnsjcjbwubwjbiwcbkc')
+            const token = jwt.sign({ '_id': user._id }, 'shhhhh')
+            res.cookie('token', token)
+            // res.cookie('token', 'sdscdcdbnsjcjbwubwjbiwcbkc')
 
             //add the token to cookie and  send response to browser
             res.send("Logged In Successfully")
-        }else{
+        } else {
             res.send("Invalid Credentials")
         }
-    }catch(err){
+    } catch (err) {
         res.send("Error: " + err.message)
     }
 })
 
 //delete user
 
-app.delete('/user', async(req,res)=>{
+app.delete('/user', async (req, res) => {
     const userId = req.body._id
-    try{
+    try {
         const deletedUser = await User.findByIdAndDelete(userId)
         res.send(deletedUser)
-    }catch(err){
+    } catch (err) {
         res.status(404).send("Error deleting the user" + err.message)
     }
 })
 
 //patch user
 
-app.patch('/user/:id', async(req,res)=>{
+app.patch('/user/:id', async (req, res) => {
     console.log("This is req.params", req.params)
     const userId = req.params?.id
     const data = req.body
-    try{
-        const allowedUpdates = ['photoURL','age','gender','password', 'about']
-        const isUpdateAllowed = Object.keys(data).every((k)=>allowedUpdates.includes(k))
-        if(!isUpdateAllowed){
+    try {
+        const allowedUpdates = ['photoURL', 'age', 'gender', 'password', 'about']
+        const isUpdateAllowed = Object.keys(data).every((k) => allowedUpdates.includes(k))
+        if (!isUpdateAllowed) {
             throw new Error("this field can't be updated")
         }
-    const updatedUser= await User.findByIdAndUpdate({_id: userId}, data ,{returnDocument:"before"})
-    console.log(updatedUser)
-    res.send("user updated successfully")
-    }catch(err){
-        res.status(404).send("Something went wrong while updation"+ err.message)
+        const updatedUser = await User.findByIdAndUpdate({ _id: userId }, data, { returnDocument: "before" })
+        console.log(updatedUser)
+        res.send("user updated successfully")
+    } catch (err) {
+        res.status(404).send("Something went wrong while updation" + err.message)
     }
 
 })
@@ -149,7 +152,7 @@ app.patch('/user/:id', async(req,res)=>{
 //     const email = req.body.emailId
 //     const data = req.body
 
-   
+
 //     try{
 //          //API LEVEL VALIDATION
 
@@ -168,12 +171,35 @@ app.patch('/user/:id', async(req,res)=>{
 //     }
 // })
 
-app.get('/profile', async(req,res)=>{
-const cookies = req.cookies
-const {token} = cookies;
+app.get('/profile', async (req, res) => {
+    try {
+        const cookies = req.cookies
 
-console.log("The token is: ", token)
+        const { token } = cookies;
 
-res.send("Reading cookies")
+        if (!token) {
+            throw new Error("Please login first")
+        }
+
+        const decoded = jwt.verify(token, 'shhhhh')
+        console.log('decoded token is: ', decoded)
+
+        const { _id } = decoded;
+        console.log("the id is: ", _id)
+
+
+        const user = await User.findById({ '_id': _id })
+        if(!user){
+            throw new Error("User nor found")
+            
+            
+        }
+        console.log("user is", user)
+        res.send(user);
+        console.log("The token is: ", token)
+    }
+    catch (err) {
+        res.status(401).send("ERROR: " + err)
+    }
 
 })
