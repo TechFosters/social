@@ -3,6 +3,7 @@ import { createDbConnection } from './config/database.js';
 import { User } from './models/user.js';
 import { validateSignUpData } from './utils/validation.js';
 import bcrypt from 'bcrypt'
+import cookieParser from 'cookie-parser';
 const app = express();
 
 createDbConnection().then(()=>{
@@ -16,6 +17,7 @@ createDbConnection().then(()=>{
 })
 
 app.use(express.json())
+app.use(cookieParser())
 //get users by email
 
 app.get('/user', async (req,res)=>{
@@ -96,6 +98,11 @@ app.get('/login', async(req,res)=>{
 
         const isPasswordValid = bcrypt.compare(password, user.password)
         if(isPasswordValid){
+
+            //create a jwt
+            res.cookie('token', 'sdscdcdbnsjcjbwubwjbiwcbkc')
+
+            //add the token to cookie and  send response to browser
             res.send("Logged In Successfully")
         }else{
             res.send("Invalid Credentials")
@@ -160,3 +167,13 @@ app.patch('/user/:id', async(req,res)=>{
 //         res.status(400).send('No user found with the above id'+err.message)
 //     }
 // })
+
+app.get('/profile', async(req,res)=>{
+const cookies = req.cookies
+const {token} = cookies;
+
+console.log("The token is: ", token)
+
+res.send("Reading cookies")
+
+})
