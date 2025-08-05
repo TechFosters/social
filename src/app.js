@@ -5,6 +5,7 @@ import { validateSignUpData } from './utils/validation.js';
 import bcrypt from 'bcrypt'
 import cookieParser from 'cookie-parser';
 import jwt from 'jsonwebtoken'
+import userAuth from './middlewares/auth.js';
 const app = express();
 
 createDbConnection().then(() => {
@@ -171,35 +172,45 @@ app.patch('/user/:id', async (req, res) => {
 //     }
 // })
 
-app.get('/profile', async (req, res) => {
-    try {
-        const cookies = req.cookies
+app.get('/profile', userAuth, async (req, res) => {
+    // made middleware out of the below code
+    
+    // try {
+    //     const cookies = req.cookies
 
-        const { token } = cookies;
+    //     const { token } = cookies;
 
-        if (!token) {
-            throw new Error("Please login first")
-        }
+    //     if (!token) {
+    //         throw new Error("Please login first")
+    //     }
 
-        const decoded = jwt.verify(token, 'shhhhh')
-        console.log('decoded token is: ', decoded)
+    //     const decoded = jwt.verify(token, 'shhhhh')
+    //     console.log('decoded token is: ', decoded)
 
-        const { _id } = decoded;
-        console.log("the id is: ", _id)
+    //     const { _id } = decoded;
+    //     console.log("the id is: ", _id)
 
 
-        const user = await User.findById({ '_id': _id })
-        if(!user){
-            throw new Error("User nor found")
+    //     const user = await User.findById({ '_id': _id })
+    //     if(!user){
+    //         throw new Error("User nor found")
             
             
-        }
-        console.log("user is", user)
-        res.send(user);
-        console.log("The token is: ", token)
-    }
-    catch (err) {
-        res.status(401).send("ERROR: " + err)
+    //     }
+    //     console.log("user is", user)
+    //     res.send(user);
+    //     console.log("The token is: ", token)
+    // }
+    // catch (err) {
+    //     res.status(401).send("ERROR: " + err)
+    // }
+
+    try{
+        const user = req.user
+
+        res.send(user)
+    }catch(err){
+        res.status(401).send("ERROR!!! " + err)
     }
 
 })
