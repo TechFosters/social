@@ -89,7 +89,7 @@ app.post('/signup', async (req, res) => {
     }
 })
 
-app.get('/login', async (req, res) => {
+app.post('/login', async (req, res) => {
     const { password, email } = req.body
     try {
 
@@ -98,10 +98,10 @@ app.get('/login', async (req, res) => {
             throw new Error("User not found")
         }
 
-        // const isPasswordValid = bcrypt.compare(password, user.password)
+        // const isPasswordValid = bcrypt.compare(password, user.password) -> offloading this logic to user schema methods for cleaner flow
         // console.log("my plain text password", password)
-        const isPasswordValid = user.validatePassword(password)
-        // console.log(isPasswordValid)
+        const isPasswordValid = await user.validatePassword(password)
+        console.log("inside app.js", isPasswordValid)
         if (isPasswordValid) {
 
             //create a jwt
