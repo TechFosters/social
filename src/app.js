@@ -98,11 +98,16 @@ app.get('/login', async (req, res) => {
             throw new Error("User not found")
         }
 
-        const isPasswordValid = bcrypt.compare(password, user.password)
+        // const isPasswordValid = bcrypt.compare(password, user.password)
+        // console.log("my plain text password", password)
+        const isPasswordValid = user.validatePassword(password)
+        // console.log(isPasswordValid)
         if (isPasswordValid) {
 
             //create a jwt
-            const token = jwt.sign({ '_id': user._id }, 'shhhhh')
+            // const token = jwt.sign({ '_id': user._id }, 'shhhhh') offloading this logic to user schema methods for cleaner flow
+            const token = await user.getJwt();
+            console.log(token)
             res.cookie('token', token)
             // res.cookie('token', 'sdscdcdbnsjcjbwubwjbiwcbkc')
 
@@ -212,5 +217,11 @@ app.get('/profile', userAuth, async (req, res) => {
     }catch(err){
         res.status(401).send("ERROR!!! " + err)
     }
+
+})
+
+app.post('/sendConnectionRequest', userAuth, async(req,res) =>{
+    const user = req.user
+    res.send(`${user.firstName} sent you a connection request`)
 
 })
